@@ -22,4 +22,8 @@ public class Board {
             }
         }
     }
+
+    public Field getFieldByXY(int x, int y) {
+        return fields.stream().filter(f -> f.getX() == x && f.getY() == y).findFirst().orElse(null);
+    }
 }

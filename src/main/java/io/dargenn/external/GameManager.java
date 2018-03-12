@@ -22,22 +22,32 @@ public class GameManager {
     }
 
     public boolean addPlayer(Player player) {
+        if(game == null) {
+            game = new Game();
+        }
         List<Player> players = game.getPlayers();
-        if (players.size() < 2 && game.isActive()) {
+        if (players.size() < 2) {
             player.setTicTacToeType(players.isEmpty() ? TicTacToeType.TIC : TicTacToeType.TAC);
             player.setNumber(players.isEmpty() ? 1 : 2);
             game.getPlayers().add(player);
+            if(player.getNumber() == 2) {
+                game.setActive(true);
+            }
             return true;
         }
         return false;
     }
 
     public boolean move(int x, int y, Player player) {
+        if(game.getBoard().getFieldByXY(x, y) == null || game.getBoard().getFieldByXY(x, y).getTicTacToeType() != null){
+            return false;
+        }
         boolean canMove = game.getBoard().getFields().stream().anyMatch(field -> field.getX() == x && field.getY() == y && field.isEmpty() && game.getNextSignToPlay().equals(player.getTicTacToeType())) && game.isActive();
         if (canMove) {
             Field field = game.getBoard().getFields().stream().filter(f -> f.getX() == x && f.getY() == y).findFirst().orElseThrow(() -> new IllegalArgumentException("Value not permitted"));
             field.setTicTacToeType(player.getTicTacToeType());
             game.setNextSignToPlay(player.getTicTacToeType().negate());
+            game.setMoveCount(game.getMoveCount() + 1);
             boolean isGameOver = isGameOver(player.getTicTacToeType());
             game.setActive(!isGameOver);
             if(isGameOver) {
@@ -47,7 +57,10 @@ public class GameManager {
         return canMove;
     }
 
-    private boolean isGameOver(TicTacToeType ticTacToeType) {
+    public boolean isGameOver(TicTacToeType ticTacToeType) {
+        if(game == null) {
+            return true;
+        }
         List<Field> fields = game.getBoard().getFields();
         boolean isThreeInColumns = isThreeInColumns(fields, ticTacToeType);
         boolean isThreeInRow = isThreeInRow(fields, ticTacToeType);
@@ -83,5 +96,9 @@ public class GameManager {
         List<Field> diagonalOneFields = fields.stream().filter(field -> (field.getX() == 1 && field.getY() == 1) || (field.getY() == 2 && field.getX() == 2) || (field.getX() == 3 && field.getY() == 3)).collect(Collectors.toList());
         List<Field> diagonalTwoFields = fields.stream().filter(field -> (field.getX() == 1 && field.getY() == 3) || (field.getY() == 2 && field.getX() == 2) || (field.getX() == 3 && field.getY() == 1)).collect(Collectors.toList());
         return diagonalOneFields.stream().allMatch(field -> field.getTicTacToeType() == ticTacToeType) || diagonalTwoFields.stream().allMatch(field -> field.getTicTacToeType() == ticTacToeType);
+    }
+
+    public void disconnect(Player player) {
+        game.getPlayers().remove(player);
     }
 }

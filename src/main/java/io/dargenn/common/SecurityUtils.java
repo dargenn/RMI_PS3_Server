@@ -6,7 +6,7 @@ import java.util.Properties;
 
 public class SecurityUtils {
     @SneakyThrows
-    public static void main(String[] args) {
+    public static void prepareSecurity() {
         Properties properties = PropertiesUtils.getProperties();
         System.setProperty("java.security.policy", properties.getProperty("security.policy.file.path"));
         if (System.getSecurityManager() == null) {
